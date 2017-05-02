@@ -1,13 +1,13 @@
-jobeet:
-    resource: "@JobeetBundle/Controller/"
-    type:     annotation
-    prefix:   /
-
 ens_jobeet:
     resource: "@EnsJobeetBundle/Controller/"
     type:     annotation
     prefix:   /
 
+ens_job_homepage:
+    path:     /
+    defaults: { _controller: EnsJobeetBundle:Job:index }
+
+
 app:
-    resource: "@AppBundle/Controller/"
-    type:     annotation
+  resource: '@AppBundle/Controller/'
+  type: annotation

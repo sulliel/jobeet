@@ -9,6 +9,7 @@ use Doctrine\ORM\Mapping as ORM;
  *
  * @ORM\Table(name="affiliate")
  * @ORM\Entity(repositoryClass="Ens\JobeetBundle\Repository\AffiliateRepository")
+ * @ORM\HasLifecycleCallbacks()
  */
 class Affiliate
 {
@@ -24,7 +25,7 @@ class Affiliate
     /**
      * @var string
      *
-     * @ORM\Column(name="url", type="string", length=255)
+     * @ORM\Column(name="url", type="string", length=255, nullable=true)
      */
     private $url;
 
@@ -38,12 +39,12 @@ class Affiliate
     /**
      * @var string
      *
-     * @ORM\Column(name="token", type="string", length=255)
+     * @ORM\Column(name="token", type="string", length=255, nullable=true)
      */
     private $token;
-    
+
     /**
-     * @var \DateTime
+     * @var bool
      *
      * @ORM\Column(name="is_active", type="boolean")
      */
@@ -52,11 +53,17 @@ class Affiliate
     /**
      * @var \DateTime
      *
-     * @ORM\Column(name="created_at", type="datetime")
+     * @ORM\Column(name="creadted_at", type="datetime", nullable=true)
      */
-    private $createdAt;
-
-
+    private $creadtedAt;
+    
+     /**
+      * @var array
+      * 
+      * @ORM\OneToMany(targetEntity="CategoryAffiliate", mappedBy="affiliateId")
+      */
+     private $category_affiliates;
+    
     /**
      * Get id
      *
@@ -140,40 +147,6 @@ class Affiliate
     }
 
     /**
-     * Set createdAt
-     *
-     * @param \DateTime $createdAt
-     *
-     * @return Affiliate
-     */
-    public function setCreatedAt($createdAt)
-    {
-        $this->createdAt = $createdAt;
-
-        return $this;
-    }
-
-    /**
-     * Get createdAt
-     *
-     * @return \DateTime
-     */
-    public function getCreatedAt()
-    {
-        return $this->createdAt;
-    }
-    
-    /**
-     * Get isActive
-     *
-     * @return bool
-     */
-    public function getIsActive()
-    {
-    	return $this->isActive;
-    }
-    
-    /**
      * Set isActive
      *
      * @param boolean $isActive
@@ -182,14 +155,91 @@ class Affiliate
      */
     public function setIsActive($isActive)
     {
-    	$this->isActive = $isActive;
-    
-    	return $this;
+        $this->isActive = $isActive;
+
+        return $this;
+    }
+
+    /**
+     * Get isActive
+     *
+     * @return bool
+     */
+    public function getIsActive()
+    {
+        return $this->isActive;
+    }
+
+    /**
+     * Set creadtedAt
+     *
+     * @param \DateTime $creadtedAt
+     *
+     * @return Affiliate
+     */
+    public function setCreadtedAt($creadtedAt)
+    {
+        $this->creadtedAt = $creadtedAt;
+
+        return $this;
+    }
+
+    /**
+     * Get creadtedAt
+     *
+     * @return \DateTime
+     */
+    public function getCreadtedAt()
+    {
+        return $this->creadtedAt;
     }
     
-    public function setCreatedAtValue()
+   	/**
+   	 * @ORM\PrePersist
+   	 */
+   	public function setCreatedAtValue()
+   	{
+   	  $this->createdAt = new \DateTime();
+    }
+    /**
+     * Constructor
+     */
+    public function __construct()
     {
-    	$this->created_at = new \DateTime();
+        $this->category_affiliates = new \Doctrine\Common\Collections\ArrayCollection();
+    }
+
+    /**
+     * Add categoryAffiliate
+     *
+     * @param \Ens\JobeetBundle\Entity\CategoryAffiliate $categoryAffiliate
+     *
+     * @return Affiliate
+     */
+    public function addCategoryAffiliate(\Ens\JobeetBundle\Entity\CategoryAffiliate $categoryAffiliate)
+    {
+        $this->category_affiliates[] = $categoryAffiliate;
+
+        return $this;
+    }
+
+    /**
+     * Remove categoryAffiliate
+     *
+     * @param \Ens\JobeetBundle\Entity\CategoryAffiliate $categoryAffiliate
+     */
+    public function removeCategoryAffiliate(\Ens\JobeetBundle\Entity\CategoryAffiliate $categoryAffiliate)
+    {
+        $this->category_affiliates->removeElement($categoryAffiliate);
+    }
+
+    /**
+     * Get categoryAffiliates
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getCategoryAffiliates()
+    {
+        return $this->category_affiliates;
     }
 }
-
