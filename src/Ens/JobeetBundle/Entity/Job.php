@@ -698,5 +698,10 @@ class Job
 	{
 		return ceil(($this->getExpiresAt()->format('U') - time()) / 86400);
 	}
+	
+	public function publish()
+	{
+		$this->setIsActivated(true);
+	}
 		
 }

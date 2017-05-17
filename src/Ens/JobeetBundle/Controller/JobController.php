@@ -7,6 +7,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 
 
 /**
@@ -129,7 +130,7 @@ class JobController extends Controller {
 	 *
 	 * @Route("/{token}", name="ens_job_delete")
 	 * 
-	 * @method ("DELETE")
+	 * @method ("POST")
 	 */
 	public function deleteAction(Request $request, Job $job) {
 		$form = $this->createDeleteForm ( $job );
@@ -175,10 +176,58 @@ class JobController extends Controller {
 		}
 		
 		$deleteForm = $this->createDeleteForm($job);
+		$publishForm = $this->createPublishForm($job->getToken());
 		
 		return $this->render('EnsJobeetBundle:Job:show.html.twig', array(
 				'job'      => $job,
 				'delete_form' => $deleteForm->createView(),
+				'publish_form' => $publishForm->createView(),
 		));
+	}
+	
+	/**
+	 * Creates a new job entity.
+	 *
+	 * @Route("/{token}/publish", name="ens_job_publish")
+	 *
+	 * @method ({"POST"})
+	 */
+	public function publishAction(Request $request, $token)
+	{
+		$form = $this->createPublishForm($token);
+		
+		
+		$form->handleRequest($request);
+		
+		if ($form->isValid()) {
+			$em = $this->getDoctrine()->getManager();
+			$entity = $em->getRepository('EnsJobeetBundle:Job')->findOneByToken($token);
+			
+			if (!$entity) {
+				throw $this->createNotFoundException('Unable to find Job entity.');
+			}
+			
+			$entity->publish();
+			$em->persist($entity);
+			$em->flush();
+			
+			
+			$this->get('session')->getFlashBag()->add('notice','Your job is now online for 30 days.');
+		}
+		
+		return $this->redirect($this->generateUrl('ens_job_preview', array(
+				'company' => $entity->getCompanySlug(),
+				'location' => $entity->getLocationSlug(),
+				'token' => $entity->getToken(),
+				'position' => $entity->getPositionSlug()
+		)));
+	}
+	
+	private function createPublishForm($token)
+	{
+		return $this->createFormBuilder(array('token' => $token))
+		->add('token', HiddenType::class)
+		->getForm()
+		;
 	}
 }

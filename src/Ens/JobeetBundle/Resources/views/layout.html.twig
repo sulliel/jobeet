@@ -47,7 +47,11 @@
       <div id="content">
         {% if app.session.flashbag.has('notice') %}
           <div class="flash_notice">
-            {{ app.session.flashbag.get('notice') }}
+            {% for flashMessage in app.session.flashbag.get('notice') %}
+
+                {{ flashMessage }}
+
+            {% endfor %}
           </div>
         {% endif %}
  
