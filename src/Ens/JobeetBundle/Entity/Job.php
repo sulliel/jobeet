@@ -4,6 +4,7 @@ namespace Ens\JobeetBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use Ens\JobeetBundle\Utils\Jobeet as Jobeet;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * Job
@@ -28,6 +29,8 @@ class Job
 	 *
 	 * @ORM\ManyToOne(targetEntity="Category", inversedBy="jobs")
 	 * @ORM\JoinColumn(name="category_id", referencedColumnName="id")
+	 * 
+	 * @Assert\NotBlank()
 	 */
 	private $categoryId;
 	
@@ -35,6 +38,9 @@ class Job
 	 * @var string
 	 *
 	 * @ORM\Column(name="type", type="string", length=255, nullable=true)
+	 * 
+	 * @Assert\NotBlank()
+	 * @Assert\Choice({"full-time", "part-time", "freelance"})
 	 */
 	private $type;
 	
@@ -42,6 +48,8 @@ class Job
 	 * @var string
 	 *
 	 * @ORM\Column(name="company", type="string", length=255)
+	 * 
+	 * @Assert\NotBlank()
 	 */
 	private $company;
 	
@@ -63,6 +71,8 @@ class Job
 	 * @var string
 	 *
 	 * @ORM\Column(name="position", type="string", length=255)
+	 * 
+	 * @Assert\NotBlank()
 	 */
 	private $position;
 	
@@ -70,6 +80,8 @@ class Job
 	 * @var string
 	 *
 	 * @ORM\Column(name="location", type="string", length=255)
+	 * 
+	 * @Assert\NotBlank()
 	 */
 	private $location;
 	
@@ -77,6 +89,8 @@ class Job
 	 * @var string
 	 *
 	 * @ORM\Column(name="description", type="text")
+	 * 
+	 * @Assert\NotBlank()
 	 */
 	private $description;
 	
@@ -84,6 +98,8 @@ class Job
 	 * @var string
 	 *
 	 * @ORM\Column(name="how_to_apply", type="text")
+	 * 
+	 * @Assert\NotBlank()
 	 */
 	private $howToApply;
 	
@@ -91,6 +107,7 @@ class Job
 	 * @var string
 	 *
 	 * @ORM\Column(name="token", type="string", length=255, unique=true)
+	 * 
 	 */
 	private $token;
 	
@@ -112,6 +129,9 @@ class Job
 	 * @var string
 	 *
 	 * @ORM\Column(name="email", type="string", length=255)
+	 * 
+	 * @Assert\NotBlank()
+	 * @Assert\Email()
 	 */
 	private $email;
 	
@@ -138,6 +158,12 @@ class Job
 	
 	
 	/**
+	 * @Assert\Image()
+	 */
+	public $file;
+	
+	
+	/**
 	 * Get id
 	 *
 	 * @return int
@@ -146,6 +172,8 @@ class Job
 	{
 		return $this->id;
 	}
+	
+	
 	
 	/**
 	 * Get category_id
@@ -537,7 +565,7 @@ class Job
 	{
 		if(!$this->getCreatedAt())
 		{
-			$this->created_at = new \DateTime();
+			$this->createdAt = new \DateTime();
 		}
 	}
 	
@@ -574,6 +602,101 @@ class Job
 		    $now = $this->getCreatedAt() ? $this->getCreatedAt()->format('U') : time();
 		    $this->expiresAt = new \DateTime(date('Y-m-d H:i:s', $now + 86400 * 30));
 		  }
+	}
+	
+	public static function getTypes()
+	{
+		return array('Full time' => 'full-time', 'Part time' => 'part-time', 'Freelance' => 'freelance');
+	}
+	
+	public static function getTypeValues()
+	{
+		return array_values(self::getTypes());
+		
+	}
+	
+	protected function getUploadDir()
+	{
+		return 'uploads/jobs';
+	}
+	
+	protected function getUploadRootDir()
+	{
+		return __DIR__.'/../../../../web/'.$this->getUploadDir();
+	}
+	
+	public function getWebPath()
+	{
+		return null === $this->logo ? null : $this->getUploadDir().'/'.$this->logo;
+	}
+	
+	public function getAbsolutePath()
+	{
+		return null === $this->logo ? null : $this->getUploadRootDir().'/'.$this->logo;
+	}
+	
+	/**
+	 * @ORM\prePersist
+	 */
+	public function preUpload()
+	{
+		if (null !== $this->file) {
+			// do whatever you want to generate a unique name
+			$this->logo = uniqid().'.'.$this->file->guessExtension()
+			;
+		}
+	}
+	
+	/**
+	 * @ORM\postPersist
+	 */
+	public function upload()
+	{
+		if (null === $this->file) {
+			return;
+		}
+		
+		// if there is an error when moving the file, an exception will
+		// be automatically thrown by move(). This will properly prevent
+		// the entity from being persisted to the database on error
+		$this->file->move($this->getUploadRootDir(), $this->logo);
+		
+		unset($this->file);
+	}
+	
+	/**
+	 * @ORM\postRemove
+	 */
+	public function removeUpload()
+	{
+		if ($file = $this->getAbsolutePath()) {
+			unlink($file);
+		}
+	}
+	
+	/**
+	 * @ORM\prePersist
+	 */
+	public function setTokenValue()
+	{
+		if(!$this->getToken())
+		{
+			$this->token = sha1($this->getEmail().rand(11111, 99999));
+		}
+	}
+	public function isExpired()
+	{
+		return $this->getDaysBeforeExpires() < 0;
+	}
+	
+	public function expiresSoon()
+	{
+		return $this->getDaysBeforeExpires() < 5;
+	}
+	
+	public function getDaysBeforeExpires()
+	{
+		return ceil(($this->getExpiresAt()->format('U') - time()) / 86400);
 	}
 		
 }
