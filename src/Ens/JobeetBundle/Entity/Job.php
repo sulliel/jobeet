@@ -40,7 +40,7 @@ class Job
 	 * @ORM\Column(name="type", type="string", length=255, nullable=true)
 	 * 
 	 * @Assert\NotBlank()
-	 * @Assert\Choice({"full-time", "part-time", "freelance"})
+	 * @Assert\Choice({"full-time", "part-time", "freelance"}, strict=true)
 	 */
 	private $type;
 	
@@ -703,5 +703,20 @@ class Job
 	{
 		$this->setIsActivated(true);
 	}
+	
+	
+	public function extend()
+	{
+		if (!$this->expiresSoon())
+		{
+			return false;
+		}
+		
+		$this->expires_at = new \DateTime(date('Y-m-d H:i:s', time() + 86400 * 30));
+		
+		return true;
+	}
+
+		
 		
 }

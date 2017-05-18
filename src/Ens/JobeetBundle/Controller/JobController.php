@@ -130,7 +130,7 @@ class JobController extends Controller {
 	 *
 	 * @Route("/{token}", name="ens_job_delete")
 	 * 
-	 * @method ("POST")
+	 * @method ("GET")
 	 */
 	public function deleteAction(Request $request, Job $job) {
 		$form = $this->createDeleteForm ( $job );
@@ -156,7 +156,7 @@ class JobController extends Controller {
 	private function createDeleteForm(Job $job) {
 		return $this->createFormBuilder ()->setAction ( $this->generateUrl ( 'ens_job_delete', array (
 				'token' => $job->getToken() 
-		) ) )->setMethod ( 'DELETE' )->getForm ();
+		) ) )->setMethod ( 'GET' )->getForm ();
 	}
 	/**
 	 * displays a job preview entity.
@@ -177,16 +177,18 @@ class JobController extends Controller {
 		
 		$deleteForm = $this->createDeleteForm($job);
 		$publishForm = $this->createPublishForm($job->getToken());
+		$extendForm = $this->createExtendForm($job->getToken());
 		
 		return $this->render('EnsJobeetBundle:Job:show.html.twig', array(
 				'job'      => $job,
 				'delete_form' => $deleteForm->createView(),
 				'publish_form' => $publishForm->createView(),
+				'extend_form' => $extendForm->createView(),
 		));
 	}
 	
 	/**
-	 * Creates a new job entity.
+	 * Publishes job entity that is not activated.
 	 *
 	 * @Route("/{token}/publish", name="ens_job_publish")
 	 *
@@ -224,6 +226,56 @@ class JobController extends Controller {
 	}
 	
 	private function createPublishForm($token)
+	{
+		return $this->createFormBuilder(array('token' => $token))
+		->add('token', HiddenType::class)
+		->getForm()
+		;
+	}
+	
+	/**
+	 * Extends job entity that is almost not valid anymore.
+	 *
+	 * @Route("/{token}/extend", name="ens_job_extend")
+	 *
+	 * @method ({"POST"})
+	 */
+	public function extendAction(Request $request, $token)
+	{
+		$form = $this->createExtendForm($token);
+		$form->handleRequest($request);
+		
+		if ($form->isValid()) {
+			$em = $this->getDoctrine()->getManager();
+			$entity = $em->getRepository('EnsJobeetBundle:Job')->findOneByToken($token);
+			
+			
+			if (!$entity) {
+				throw $this->createNotFoundException('Unable to find Job entity.');
+			}
+			
+			if (!$entity->extend()) {
+				throw $this->createNotFoundException('Unable to find extend the Job.');
+			}
+			
+			$expiresAt =new \DateTime(date('Y-m-d H:i:s', time()+ 86400 * 30));
+			$entity->setExpiresAt($expiresAt);
+			$em->persist($entity);
+			$em->flush();
+			
+			
+			$this->get('session')->getFlashBag()->set('notice', sprintf('Your job validity has been extended until %s.', $entity->getExpiresAt()->format('m/d/Y')));
+		}
+		
+		return $this->redirect($this->generateUrl('ens_job_preview', array(
+				'company' => $entity->getCompanySlug(),
+				'location' => $entity->getLocationSlug(),
+				'token' => $entity->getToken(),
+				'position' => $entity->getPositionSlug()
+		)));
+	}
+	
+	private function createExtendForm($token)
 	{
 		return $this->createFormBuilder(array('token' => $token))
 		->add('token', HiddenType::class)

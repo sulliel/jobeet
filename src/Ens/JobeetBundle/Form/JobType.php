@@ -48,6 +48,8 @@ class JobType extends AbstractType
     {
         return 'ens_jobeetbundle_job';
     }
+    
+    
 
 
 }

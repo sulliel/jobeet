@@ -57,7 +57,11 @@
  
         {% if app.session.flashbag.has('error') %}
           <div class="flash_error">
-            {{ app.session.flashbag.get('error') }}
+            {% for flashMessage in app.session.flashbag.get('error') %}
+
+                {{ flashMessage }}
+
+            {% endfor %}
           </div>
         {% endif %}
  
