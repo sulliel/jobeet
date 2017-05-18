@@ -1,7 +1,7 @@
 {% extends 'EnsJobeetBundle::layout.html.twig' %}
  
 {% block title %}
-    {{ job.company }} is looking for a {{ job.position }}
+    {{ entity.company }} is looking for a {{ entity.position }}
 {% endblock %}
  
 {% block stylesheets %}
@@ -11,36 +11,36 @@
  
 {% block content %}
 {% if app.request.get('token') %}
-	    {% include 'EnsJobeetBundle:Job:admin.html.twig' with {'job': job} %}
+	    {% include 'EnsJobeetBundle:Job:admin.html.twig' with {'job': entity} %}
 	  {% endif %}
 
     <div id="job">
-      <h1>{{ job.company }}</h1>
-      <h2>{{ job.location }}</h2>
+      <h1>{{ entity.company }}</h1>
+      <h2>{{ entity.location }}</h2>
       <h3>
-        {{ job.position }}
-        <small> - {{ job.type }}</small>
+        {{ entity.position }}
+        <small> - {{ entity.type }}</small>
       </h3>
  
-      {% if job.logo %}
+      {% if entity.logo %}
         <div class="logo">
-          <a href="{{ job.url }}">
-            <img src="/uploads/jobs/{{ job.logo }}"
-              alt="{{ job.company }} logo" />
+          <a href="{{ entity.url }}">
+            <img src="/uploads/jobs/{{ entity.logo }}"
+              alt="{{ entity.company }} logo" />
           </a>
         </div>
       {% endif %}
  
       <div class="description">
-        {{ job.description|nl2br }}
+        {{ entity.description|nl2br }}
       </div>
  
       <h4>How to apply?</h4>
  
-      <p class="how_to_apply">{{ job.howtoapply }}</p>
+      <p class="how_to_apply">{{ entity.howtoapply }}</p>
  
       <div class="meta">
-        <small>posted on {{ job.createdat|date('m/d/Y') }}</small>
+        <small>posted on {{ entity.createdat|date('m/d/Y') }}</small>
       </div>
  
       
