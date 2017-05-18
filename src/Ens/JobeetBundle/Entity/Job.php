@@ -156,6 +156,16 @@ class Job
 	 */
 	private $updatedAt;
 	
+	/**
+	 * @var string
+	 *
+	 * @ORM\ManyToOne(targetEntity="Level", inversedBy="jobs")
+	 * @ORM\JoinColumn(name="level_id", referencedColumnName="id")
+	 *
+	 * @Assert\NotBlank()
+	 */
+	private $levelId;
+	
 	
 	/**
 	 * @Assert\Image()
@@ -715,6 +725,30 @@ class Job
 		$this->expires_at = new \DateTime(date('Y-m-d H:i:s', time() + 86400 * 30));
 		
 		return true;
+	}
+	
+	/**
+	 * Get level_id
+	 *
+	 * @return string
+	 */
+	public function getLevelId()
+	{
+		return $this->levelId;
+	}
+	
+	/**
+	 * Set level_id
+	 *
+	 * @param string  $levelId
+	 *
+	 * @return Job
+	 */
+	public function setLevelId($levelId)
+	{
+		$this->levelId = $levelId;
+		
+		return $this;
 	}
 
 		

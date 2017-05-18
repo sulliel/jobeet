@@ -1,0 +1,12 @@
+{% block content %}
+  <div class="category">
+    <div class="feed">
+      <a href="">Feed</a>
+    </div>
+    <h1>{{ level.description }}</h1>
+  </div>
+ 
+  {% include 'EnsJobeetBundle:Job:list.html.twig' with {'jobs': level.activejobs} %}
+ 
+ 
+{% endblock %}

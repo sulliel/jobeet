@@ -103,4 +103,19 @@ class JobRepository extends \Doctrine\ORM\EntityRepository {
 		
 		return $job;
 	}
+	
+	public function getJobsBylevel($level){
+		
+		$qb = $this->createQueryBuilder('j')
+		->where('j.levelId = :level')
+		->setParameter('level', $level);
+
+		
+	
+		$query = $qb->getQuery();
+		
+		return $query->getResult();
+		
+		
+	}
 }

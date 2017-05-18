@@ -6,6 +6,7 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Ens\JobeetBundle\Entity\Job;
+use Ens\JobeetBundle\Entity\Level;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
 
@@ -19,6 +20,7 @@ class JobType extends AbstractType
     	
         $builder->add('categoryId')
         		->add('type', ChoiceType::class, array('choices' => Job::getTypes(), 'expanded' => true))
+        		->add('levelId', ChoiceType::class, array('choices' => Level::getTypes()))
         		->add('company')
         		->add('file', FileType::class, array('label' => 'Company logo', 'required' => false))
 		        ->add('url')

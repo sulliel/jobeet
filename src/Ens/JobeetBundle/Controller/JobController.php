@@ -52,6 +52,8 @@ class JobController extends Controller {
 	public function newAction(Request $request) {
 		$job = new Job ();
 		$job->setType('full-time');
+		
+		$job->setLevelId(27);
 		$form = $this->createForm ( 'Ens\JobeetBundle\Form\JobType', $job );
 		$form->handleRequest ( $request );
 		
@@ -67,6 +69,11 @@ class JobController extends Controller {
 					'position' => $job->getPositionSlug()
 			)));
 		}
+		
+		$logger = $this->get('logger');
+		$logger->info(time().' : New Job created.');
+		
+		
 		
 		return $this->render ( 'EnsJobeetBundle:Job:new.html.twig', array (
 				'job' => $job,
