@@ -750,6 +750,11 @@ class Job
 		
 		return $this;
 	}
+	
+	public function isValidLocation($location)
+	{
+		
+	}
 
 		
 		
