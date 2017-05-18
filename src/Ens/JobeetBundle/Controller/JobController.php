@@ -23,7 +23,7 @@ class JobController extends Controller {
 	 * 
 	 * @method ("GET")
 	 */
-	public function indexAction() {
+	public function indexAction(Request $request) {
 		$em = $this->getDoctrine ()->getManager ();
 		
 		$categories = $em->getRepository ( 'EnsJobeetBundle:Category' )->getWithJobs ();
@@ -33,10 +33,13 @@ class JobController extends Controller {
 			
 			$category->setMoreJobs($em->getRepository('EnsJobeetBundle:Job')->countActiveJobs($category->getId()) - $this->container->getParameter('max_jobs_on_homepage'));
 		}
+		$format = $request->getRequestFormat();
 		
-		return $this->render ( 'EnsJobeetBundle:Job:index.html.twig', array (
-				'categories' => $categories 
-		) );
+		return $this->render('EnsJobeetBundle:Job:index.'.$format.'.twig', array(
+				'categories' => $categories,
+				'lastUpdated' => $em->getRepository('EnsJobeetBundle:Job')->getLatestPost()->getCreatedAt()->format(DATE_ATOM),
+				'feedId' => sha1($this->get('router')->generate('ens_job', array('_format'=> 'atom'), true)),
+		));
 	}
 	
 	/**
